@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "build/js",
+    "resolveJsonModule": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true
+  },
+  "ts-node": {
+    "files": true
+  }
+}

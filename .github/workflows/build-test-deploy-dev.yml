@@ -1,0 +1,42 @@
+# This workflow verifies the quality of pull requests.
+
+name: Analyze, Build, Test & Deploy to Dev
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened, synchronize, closed]
+
+# Environment variables can be overridden in .github/env/ci
+env:
+  GITHUB_TOKEN: ${{ secrets.ENG_STD_TOKEN }}
+  GITHUB_EVENT_NUMBER: ${{ github.event.number }}
+
+jobs:
+
+  verify:
+    name: Analyze, Build, Test & Deploy to Dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cardinalby/export-env-action@v1
+        with:
+          envFile: .github/env/dev
+          expand: 'true'
+          expandWithJobEnv: 'true'
+      - name: Install dependencies
+        run: npm run install-all
+      - name: Build
+        run: npm run build
+      - name: Analyze
+        run: npm run analyze
+      - name: Run Unit Tests
+        run: npm run test
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Deploy
+        run: npm run deploy
+      - name: Integration test
+        run: npm run integration-test
